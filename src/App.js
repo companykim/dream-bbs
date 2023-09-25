@@ -1,25 +1,22 @@
-import logo from './logo.svg';
 import './App.css';
 
+import BBSRouter from 'router/BBSRouter';
+
+import {useContext } from 'react';
+import AppContext from 'context/AppContextProvider';
+import axios from 'api/axios';
+
+const getCodeList = async (setCodeList) => {
+  const response = await axios.get("/framework/anonymous/listAllContactPointType");
+  setCodeList(response?.data);
+}
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const { codeList, setCodeList } = useContext(AppContext);
+  if (!codeList) {
+    getCodeList(setCodeList);
+  }
+  return <BBSRouter/>
 }
 
 export default App;
