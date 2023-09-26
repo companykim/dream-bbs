@@ -42,7 +42,7 @@ export default function AttachedFileList({ writer, listAttach, setListAttach }) 
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          "x-auth-token": `${writer.accessToken}`
+          "x-auth-token": `Bearer ${writer.accessToken}`
         }
       }).then(res => {
         const listDto = res.data;

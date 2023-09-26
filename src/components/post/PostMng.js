@@ -10,8 +10,8 @@ import ThumbnailList from 'atom/ThumbnailList';
 export default function PostMng() {
 	const location = useLocation();
 	//신규 시 post.boardVO.id 활용, 수정 시 모든 정보 활용
-	const state = location.state;
 	const post = location.state?.post;
+	const state = location.state?.state;
 
 	const { auth } = useContext(AppContext);
 	const navigate = useNavigate();
@@ -47,7 +47,8 @@ export default function PostMng() {
 					}
 				}
 			);
-			navigate(`/board/${post.boardVO.id}/${state}`);
+			navigate(`/board`, {state:{boardId:post.boardVO.id, page:1}});
+			//navigate(`/board/${post.boardVO.id}/1`);
 
 			//clear state and controlled inputs
 			//need value attrib on inputs for this
@@ -63,12 +64,12 @@ export default function PostMng() {
 			const data = await axios.delete(`/post/${post.id}`,
 				{headers: {
 					'Content-Type': 'application/json',
-					"x-auth-token": `${auth.accessToken}`}});
+					"x-auth-token": `Bearer ${auth.accessToken}`}});
 		} catch (err) {
 			console.log('Delete Failed', err);
 		} finally {
 			// navigate state 전달
-			navigate(`/board/${{boardId:post.boardVO.id}}`);
+			navigate(`/board`, {state:state});
 		}
 	}
 

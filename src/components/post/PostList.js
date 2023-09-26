@@ -1,25 +1,32 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import {Fetch} from 'toolbox/Fetch';
+import { Fetch } from 'toolbox/Fetch';
 import { displayDate } from "toolbox/DateDisplayer";
 import AppContext from "context/AppContextProvider";
 
-export default function PostList() {
+export default function PostList({}) {
     const location = useLocation();
 
     const { auth } = useContext(AppContext);
     const isMember = auth?.roles?.includes("member");
-	const state = location.state;
+	let state = location.state;
+ 
+    const [postListUri, setPostListUri] = useState();
     const [currentPage, setCurrentPage] = useState(state.page);
     const txtSearch = useRef();
-    let initUrl;
-    if (state.search) {
-        initUrl = `http://localhost:8080/post/anonymous/search/${state.boardId}/${state.search}/${state.page}`
-    } else {
-        initUrl = `http://localhost:8080/post/anonymous/listAll/${state.boardId}/${state.page}`;
-    }
-    const [postListUri, setPostListUri] = useState(initUrl);
+    
+    useEffect(()=> {
+        let initUrl;
+    
+        if (state.search) {
+            initUrl = `http://localhost:8080/post/anonymous/search/${state.boardId}/${state.search}/${state.page}`
+        } else {
+            initUrl = `http://localhost:8080/post/anonymous/listAll/${state.boardId}/${state.page}`;
+        }
+        setPostListUri(initUrl);
+    }, [state.boardId, state.search, state.page])
+    
 
     function buildPostListUri(page) {
         let search = txtSearch.current.value;
@@ -110,10 +117,11 @@ export default function PostList() {
             {isMember ?
                 <Link
                     to="/post/managePost"
-                    state={{ post: { boardVO: { id: state.boardId } } }}>
+                    state={{ post: { boardVO: { id: state.boardId }, listAttachFile:[] } }}>
                     글쓰기
                 </Link> : ""}
-            {state.postListWithPaging?renderSuccess(state.postListWithPaging):
+            {state.postListWithPaging?
+                renderSuccess(state.postListWithPaging):
                 <Fetch uri={postListUri} renderSuccess={renderSuccess} />
             }
         </div>

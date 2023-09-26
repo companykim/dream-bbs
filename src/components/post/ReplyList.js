@@ -44,7 +44,7 @@ export default function ReplyList({parent}) {
 				bodyData,
 				{headers: {
 					'Content-Type': 'application/json',
-					"x-auth-token": `${auth.accessToken}`}}
+					"x-auth-token": `Bearer ${auth.accessToken}`}}
 			);
             const reply = response.data;
             setJustCreatedReplyList([reply, ...justCreatedReplyList]);

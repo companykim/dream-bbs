@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {Fetch} from 'toolbox/Fetch';
 import LoginModal from 'components/LoginModal';
 import AppContext from "context/AppContextProvider";
 
-function BBSNav() {
+export default function BBSNav() {
     const boardListUri = `http://localhost:8080/bb/anonymous/listAll`;
     const { auth } = useContext(AppContext);
     const isManager = auth?.roles?.includes("manager");
@@ -24,13 +24,12 @@ function BBSNav() {
     function renderSuccess(boardList) {
         return <>
             {boardList.map(board => (
-                <Link key={board.id} to={`/board`}
+                <Link key={board.id} to={`/board`} 
                     state={{ boardId : board.id, page: 1}}>
                     &nbsp;&nbsp;{board.name}
                 </Link>
+                
             ))}
         </>
     }
 }
-
-export default BBSNav;
