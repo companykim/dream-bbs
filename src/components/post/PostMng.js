@@ -40,14 +40,21 @@ export default function PostMng() {
 			await axios.post(
 				"/post/mngPost",
 				bodyData,
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						"x-auth-token": `${auth.accessToken}`
-					}
-				}
+				{headers: {
+					'Content-Type': 'application/json',
+					"x-auth-token": `Bearer ${auth.accessToken}`}}
 			);
-			navigate(`/board`, {state:{boardId:post.boardVO.id, page:1}});
+			console.log('post.id', post.id);
+			if (!post.id) {
+				// 글쓰기
+				const ttt = {boardId:post.boardVO.id, page:1, search:""};
+				console.log('//글쓰기 ttt', ttt);
+				navigate(`/board`, {state:ttt});
+			} else {
+				// 수정
+				console.log('수정', post);
+				navigate(`/board`, {state:state});
+			}
 			//navigate(`/board/${post.boardVO.id}/1`);
 
 			//clear state and controlled inputs
@@ -69,6 +76,7 @@ export default function PostMng() {
 			console.log('Delete Failed', err);
 		} finally {
 			// navigate state 전달
+			console.log('Delete state', state);
 			navigate(`/board`, {state:state});
 		}
 	}

@@ -13,7 +13,7 @@ function Fetch({uri, renderSuccess = f=>f,
     }
 }
 
-function Post({uri, body, renderSuccess = f=>f,
+function AxiosPost({uri, body, renderSuccess = f=>f,
     loadingFallBack = <p>loading...</p>,
     renderError = ({error})=>(<pre>{JSON.stringify(error, null, 2)}</pre>)}) {
 
@@ -22,8 +22,8 @@ function Post({uri, body, renderSuccess = f=>f,
     if (loading) return loadingFallBack;
     if (error) return renderError({error});
     if (data) {
-        return renderSuccess(data);
+        return renderSuccess(body, data);
     }
 }
 
-export {Fetch, Post};
+export {Fetch, AxiosPost};

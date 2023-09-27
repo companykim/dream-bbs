@@ -1,65 +1,56 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Fetch } from 'toolbox/Fetch';
 import { displayDate } from "toolbox/DateDisplayer";
 import AppContext from "context/AppContextProvider";
 
-export default function PostList({}) {
-    const location = useLocation();
-
+export default function PostList() {
     const { auth } = useContext(AppContext);
     const isMember = auth?.roles?.includes("member");
+    
+    const location = useLocation();
 	let state = location.state;
- 
-    const [postListUri, setPostListUri] = useState();
-    const [currentPage, setCurrentPage] = useState(state.page);
-    const txtSearch = useRef();
-    
-    useEffect(()=> {
-        let initUrl;
-    
-        if (state.search) {
-            initUrl = `http://localhost:8080/post/anonymous/search/${state.boardId}/${state.search}/${state.page}`
-        } else {
-            initUrl = `http://localhost:8080/post/anonymous/listAll/${state.boardId}/${state.page}`;
-        }
-        setPostListUri(initUrl);
-    }, [state.boardId, state.search, state.page])
-    
+    console.log("PostList param", state);
 
-    function buildPostListUri(page) {
-        let search = txtSearch.current.value;
-        console.log("search 입력값 : " + search);
-        if (!search && state.search)
-            search = state.search;
-
-        console.log("이전 url : " + postListUri);
-        if (search.trim()) {
-            console.log("검색 조회 : ");
-            setPostListUri(`http://localhost:8080/post/anonymous/search/${state.boardId}/${search}/${page}`);
-            console.log(`검색 http://localhost:8080/post/anonymous/search/${state.boardId}/${search}/${page}`);
-        } else {
-            console.log("기본 조회 : ");
-            setPostListUri(`http://localhost:8080/post/anonymous/listAll/${state.boardId}/${page}`);
-            console.log(`기본 http://localhost:8080/post/anonymous/listAll/${state.boardId}/${page}`);
-        }
-        console.log("CurrentPage : " + currentPage);
-        setCurrentPage(page);
-        console.log("setCurrentPage(choosenPage)호출 이후 : " + currentPage);
-        //useState로 관리되는 값은 한 사이클 이후 읽기 가능하군요
+    function buildUrl(step) {
+        console.log("buildUrl(step", step);
+        if (state.search) 
+            return `http://localhost:8080/post/anonymous/search/${state.boardId}/${state.search}/${state.page}`;
+         else 
+            return `http://localhost:8080/post/anonymous/listAll/${state.boardId}/${state.page}`;
+        
     }
+    const [postListUri, setPostListUri] = useState(buildUrl(222));
 
-    const onSearch = (e) => {
-        e.preventDefault();
-        state.postListWithPaging = null;
-        state.search = null;
-        buildPostListUri(1);
+    const [targetBoard, setTargetBoard] = useState(state.boardId);
+    console.log("saved targetBoard", targetBoard);
+
+    if (targetBoard !== state.boardId) {
+        console.log("targetBoard chaging", state.boardId);
+        setTargetBoard(state.boardId);
+        setPostListUri(buildUrl());
+        console.log("다시 그리기 시작해");
     }
 
     function goTo(choosenPage) {
         state.postListWithPaging = null;
-        buildPostListUri(choosenPage);
+        state.page = choosenPage;
+
+        setPostListUri(buildUrl());
+    }
+    
+    const txtSearch = useRef();
+
+    const onSearch = (e) => {
+        e.preventDefault();
+        let search = txtSearch.current.value;
+
+        state.postListWithPaging = null;
+        state.search = search;
+        state.page = 1;
+
+        setPostListUri(buildUrl());
     }
 
     const displayPagination = (paging) => {
@@ -93,7 +84,7 @@ export default function PostList({}) {
                         <tr key={post.id}>
                             <td>
                                 <Link key={post.id} to={`/post`}
-                                      state={{ id:post.id, boardId:state.boardId, page: currentPage, search: txtSearch.current?.value, postListWithPaging}}>
+                                      state={{ id:post.id, boardId:state.boardId, page: state.page, search: txtSearch.current?.value, postListWithPaging}}>
                                     &nbsp;&nbsp;{post.title}
                                 </Link>
                             </td>
@@ -119,11 +110,9 @@ export default function PostList({}) {
                     to="/post/managePost"
                     state={{ post: { boardVO: { id: state.boardId }, listAttachFile:[] } }}>
                     글쓰기
-                </Link> : ""}
-            {state.postListWithPaging?
-                renderSuccess(state.postListWithPaging):
-                <Fetch uri={postListUri} renderSuccess={renderSuccess} />
+                </Link> : null
             }
+            <Fetch uri={postListUri} renderSuccess={renderSuccess} />
         </div>
     );
 }
